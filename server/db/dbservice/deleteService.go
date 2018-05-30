@@ -4,9 +4,6 @@ import (
 	"../../models"
 )
 
-func DeleteGroup(groupName string){
-	db := dbconnect()
-	defer db.Close()
-	db.Where("group_name = ?", groupName).Delete(&models.Group{})
+func (dbcon * DBCON) DeleteGroup(groupName string){
+	dbcon.con.Where("group_name = ?", groupName).Delete(&models.Group{})
 }
-
