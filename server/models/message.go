@@ -5,14 +5,14 @@ import (
 )
 
 type Message struct {
-	gorm.Model
+	gorm.Model `json:"-"`
 
 	User               User
 	Group              Group
 	MessageContentType MessageContentType
 
 	Content              string `json:"message_content"`
-	MessageSenderID      uint   `json:"message_sender_id"`
-	MessageRecipientID   uint   `json:"message_recepient_id"`
-	MessageContentTypeID uint   `json:"message_content_type_id"`
+	MessageSenderID      uint   `json:"-"`
+	MessageRecipientID   uint   `json:"-"`
+	MessageContentTypeID uint   `json:"-"`
 }

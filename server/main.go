@@ -1,9 +1,14 @@
 package main
 
 import (
-	//"github.com/gokh16/go_messenger/server/handlers"
-	"go_messenger/server/handlers/tcp"
+	"flag"
+	"log"
+	"net/http"
+
+	handlers "github.com/gokh16/go_messenger/server/handlers/ws"
 )
+
+//"github.com/gokh16/go_messenger/server/handlers"
 
 //"github.com/gokh16/go_messenger/server/orm"
 
@@ -34,25 +39,39 @@ import (
 //		panic(err)
 //	}
 //
-//	flag.Parse()
-//	hub := handlers.NewHub()
-//
-//	go hub.RunHub()
-//	fs := http.FileServer(http.Dir("./public"))
-//	http.Handle("/", fs)
-//	http.HandleFunc("/ws", func(w http.ResponseWriter, r *http.Request) {
-//		handlers.ServeWebsocket(hub, w, r)
-//	})
-//
-//	log.Println("HTTP server started on :12345")
-//	err := http.ListenAndServe(":12345", nil)
-//	if err != nil {
-//		panic(err)
-//	}
+// flag.Parse()
+// hub := handlers.NewHub()
+
+// go hub.RunHub()
+// fs := http.FileServer(http.Dir("./public"))
+// http.Handle("/", fs)
+// http.HandleFunc("/ws", func(w http.ResponseWriter, r *http.Request) {
+// 	handlers.ServeWebsocket(hub, w, r)
+// })
+
+// log.Println("HTTP server started on :12345")
+// err := http.ListenAndServe(":12345", nil)
+// if err != nil {
+// 	panic(err)
+// }
 //
 //}
 
 //TCP main
 func main() {
-	tcp.Handler()
+	flag.Parse()
+	hub := handlers.NewHub()
+
+	go hub.RunHub()
+	fs := http.FileServer(http.Dir("./public"))
+	http.Handle("/", fs)
+	http.HandleFunc("/ws", func(w http.ResponseWriter, r *http.Request) {
+		handlers.ServeWebsocket(hub, w, r)
+	})
+
+	log.Println("HTTP server started on :12345")
+	err := http.ListenAndServe(":12345", nil)
+	if err != nil {
+		panic(err)
+	}
 }

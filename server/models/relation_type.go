@@ -5,7 +5,7 @@ import (
 )
 
 type RelationType struct {
-	gorm.Model
+	gorm.Model `json:"-"`
 
-	Type string `json:"relation_type"`
+	Type string `json:"-"`
 }

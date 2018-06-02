@@ -5,12 +5,12 @@ import (
 )
 
 type User struct {
-	gorm.Model
+	gorm.Model `json:"-"`
 
 	Login    string
-	Password string
-	Username string `json:"username"`
-	Email    string `json:"email"`
-	Status   bool
-	UserIcon string
+	Password string `json:"-"`
+	Username string `json:"username,omitempty"`
+	Email    string `json:"email,omitempty"`
+	Status   bool   `json:"-"`
+	UserIcon string `json:"-"`
 }

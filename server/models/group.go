@@ -5,7 +5,7 @@ import (
 )
 
 type Group struct {
-	gorm.Model
+	gorm.Model `json:"-"`
 
 	User      User
 	GroupType GroupType

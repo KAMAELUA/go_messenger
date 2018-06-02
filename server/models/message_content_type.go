@@ -5,7 +5,7 @@ import (
 )
 
 type MessageContentType struct {
-	gorm.Model
+	gorm.Model `json:"-"`
 
-	Type string `json:"message_content_type"`
+	Type string `json:"-"`
 }

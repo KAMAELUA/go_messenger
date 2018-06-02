@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
@@ -12,6 +13,9 @@ import (
 var upgrader = websocket.Upgrader{
 	ReadBufferSize:  1024,
 	WriteBufferSize: 1024,
+	CheckOrigin: func(r *http.Request) bool {
+		return true
+	},
 }
 
 type Client struct {
@@ -30,12 +34,17 @@ func (c *Client) ReadOnConnection() {
 	}()
 
 	for {
-		err := c.conn.ReadJSON(&msg)
+		_, message, err := c.conn.ReadMessage()
 		if err != nil {
-			log.Println("All clients unregistered")
-			panic(err)
+			if websocket.IsUnexpectedCloseError(err, websocket.CloseGoingAway, websocket.CloseAbnormalClosure) {
+				log.Printf("error: %v", err)
+			}
+			break
 		}
-		fmt.Println(msg)
+		err = json.Unmarshal(message, &msg)
+		if err != nil {
+			fmt.Println("There was an error:", err)
+		}
 		c.hub.broadcast <- msg
 	}
 }
@@ -53,8 +62,7 @@ func (c *Client) WriteOnConnection() {
 		}
 		err := c.conn.WriteJSON(message)
 		if err != nil {
-			log.Println("Cannot write json")
-			panic(err)
+			fmt.Println("Cannot write json")
 		}
 	}
 }
@@ -62,8 +70,7 @@ func (c *Client) WriteOnConnection() {
 func ServeWebsocket(hub *Hub, w http.ResponseWriter, r *http.Request) {
 	conn, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
-		log.Println("Cannot upgrade")
-		panic(err)
+		fmt.Println("Cannot upgrade")
 	}
 	client := &Client{
 		hub:  hub,
