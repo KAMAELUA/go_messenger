@@ -4,8 +4,11 @@ import (
 	"bufio"
 	"encoding/json"
 	"fmt"
+	"../../userConnections"
 	"log"
 	"net"
+	"../../models"
+	"../../../desktop/desktop-client"
 )
 
 type Message struct {
@@ -30,8 +33,10 @@ func Handler() {
 	}
 	defer ln.Close()
 	for {
+		log.Print("TCP server started on :8080")
 		conn, err := ln.Accept()
 		connections = append(connections, conn)
+
 		if err != nil {
 			log.Print("Connection doesn't accepted: ")
 			log.Fatal(err)
@@ -55,19 +60,25 @@ func HandleJSON(conn net.Conn) {
 	}
 }
 
-func ParseJSON(bytes []byte, conn net.Conn) (Message, string, string) {
-	flag := "tcp"
+func ParseJSON(bytes []byte, conn net.Conn) (Message, string) {
 	message := Message{}
+	wsmsg := models.Message{}
 	err := json.Unmarshal(bytes, &message)
+	wsmsg.Content = message.Content
 	if err != nil {
 		log.Print("Unmarshal doesn't work: ")
 		log.Fatal(err)
 	}
-	fmt.Println(message.Login)
+	fmt.Println(message.UserName)
 	fmt.Println(message.Content)
-	for _, conns := range connections {
-		conns.Write([]byte(message.Content))
-		conns.Write([]byte("\n"))
+	userConnections.TCPConnections[conn] = message.UserName
+	for conns, name := range userConnections.TCPConnections {
+		if(name != message.UserName){
+		conns.Write([]byte(desktop_client.JSONencode(message.UserName, "", "", message.Content, "Broadcast", " ", " ", false, " ", "SendMessageTo")))
+		}
 	}
-	return message, "func", flag
+	for client,_ := range userConnections.WSConnections {
+		client.WriteJSON(wsmsg)
+	}		
+	return message, " func "
 }

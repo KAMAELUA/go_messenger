@@ -1,0 +1,9 @@
+package main
+
+import (
+	"./desktop-client"
+)
+
+func main() {
+		desktop_client.Draw()
+}

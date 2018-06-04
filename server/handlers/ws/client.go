@@ -1,4 +1,4 @@
-package handlers
+package ws
 import (
 	"fmt"
 	"log"
@@ -12,7 +12,6 @@ var upgrader = websocket.Upgrader{
 	ReadBufferSize:  1024,
 	WriteBufferSize: 1024,
 }
-
 type Client struct {
 	hub  *Hub
 	conn *websocket.Conn
@@ -74,4 +73,3 @@ func ServeWebsocket(hub *Hub, w http.ResponseWriter, r *http.Request) {
 	go client.WriteOnConnection()
 	go client.ReadOnConnection()
 }
-

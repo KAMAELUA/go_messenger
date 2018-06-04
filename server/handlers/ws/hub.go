@@ -1,7 +1,9 @@
-package handlers
+package ws
 
-import "../../models"
-
+import (
+	"../../models"
+	"../../userConnections"
+)
 type Hub struct {
 	clients    map[*Client]bool
 	broadcast  chan models.Message
@@ -23,6 +25,8 @@ func (h *Hub) RunHub() {
 		select {
 		case client := <-h.register:
 			h.clients[client] = true
+			userConnections.WSConnections[client.conn] = "Maxim"
+
 		case client := <-h.unregister:
 			if _, ok := h.clients[client]; ok {
 				delete(h.clients, client)
@@ -32,12 +36,16 @@ func (h *Hub) RunHub() {
 			for client := range h.clients {
 				select {
 				case client.send <- message:
+				//userConnections.WSConnections[client.conn] = string(message.MessageSenderID)
 				default:
 					close(client.send)
 					delete(h.clients, client)
 				}
 			}
+			for conns, _ := range userConnections.TCPConnections {
+			conns.Write([]byte(message.Content))
+			conns.Write([]byte("\n"))
+			}
 		}
 	}
 }
-

@@ -5,7 +5,6 @@ import (
 	"flag"
 	"log"
 	"net/http"
-	"fmt"
 	"./handlers/ws"
 )
 
@@ -15,13 +14,13 @@ func tcpHandler(){
 
 func wsHandler(){
 	flag.Parse()
-	hub := handlers.NewHub()
+	hub := ws.NewHub()
 
 	go hub.RunHub()
 	fs := http.FileServer(http.Dir("./public"))
 	http.Handle("/", fs)
 	http.HandleFunc("/ws", func(w http.ResponseWriter, r *http.Request) {
-		handlers.ServeWebsocket(hub, w, r)
+		ws.ServeWebsocket(hub, w, r)
 	})
 
 	log.Println("HTTP server started on :12345")
@@ -33,8 +32,5 @@ func wsHandler(){
 
 func main() {
 	go wsHandler()	
-	fmt.Println("good")
 	tcpHandler()
-	fmt.Println("good")
-
 }
