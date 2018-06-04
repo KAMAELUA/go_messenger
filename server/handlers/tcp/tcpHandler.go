@@ -6,21 +6,11 @@ import (
 	"fmt"
 	"log"
 	"net"
+	"../../protocols"
+	"../../userConnections"
+	"../../routing"
 )
 
-//Message struct ...
-type Message struct {
-	UserName    string
-	GroupName   string
-	ContentType string
-	Content     string
-	Login       string
-	Password    string
-	Email       string
-	Status      bool
-	UserIcon    string
-	Action      string
-}
 
 var connections []net.Conn
 
@@ -30,6 +20,7 @@ func Handler() {
 	if err != nil {
 		log.Fatal(err)
 	}
+	log.Println("TCP server started on :8080")
 	defer ln.Close()
 	for {
 		conn, err := ln.Accept()
@@ -59,9 +50,9 @@ func HandleJSON(conn net.Conn) {
 }
 
 //ParseJSON func ..
-func ParseJSON(bytes []byte, conn net.Conn) (Message, string, string) {
+func ParseJSON(bytes []byte, conn net.Conn) (protocols.Message, string, string) {
 	flag := "tcp"
-	message := Message{}
+	message := protocols.Message{}
 	err := json.Unmarshal(bytes, &message)
 	if err != nil {
 		log.Print("Unmarshal doesn't work: ")
@@ -69,9 +60,24 @@ func ParseJSON(bytes []byte, conn net.Conn) (Message, string, string) {
 	}
 	fmt.Println(message.Login)
 	fmt.Println(message.Content)
-	for _, conns := range connections {
-		conns.Write([]byte(message.Content))
+	userConnections.TCPConnections[conn] = message.UserName
+	SendToAll(routing.RouterIn(message))
+	/*for conns, _ := range userConnections.TCPConnections {
+		conns.Write([]byte(JSONencode(message.UserName, "", "", message.Content, "Broadcast", " ", " ", false, " ", "SendMessageTo")))
 		conns.Write([]byte("\n"))
 	}
+	for client,_ := range userConnections.WSConnections {
+		client.WriteJSON(message)
+	}*/
 	return message, "func", flag
+}
+
+func SendToAll(msg protocols.Message){
+	for conns,_ := range userConnections.TCPConnections {
+		conns.Write([]byte(JSONencode(msg.UserName, "", "", msg.Content, "Broadcast", " ", " ", false, " ", "SendMessageTo")))
+		conns.Write([]byte("\n"))
+	}
+	for conns2,_ := range userConnections.WSConnections {
+		conns2.WriteJSON(msg)
+	}
 }

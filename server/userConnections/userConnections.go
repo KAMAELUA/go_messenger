@@ -2,7 +2,6 @@ package userConnections
 
 import (
 	"net"
-
 	"github.com/gorilla/websocket"
 )
 

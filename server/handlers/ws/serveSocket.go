@@ -3,9 +3,9 @@ package ws
 import (
 	"fmt"
 	"log"
-	"net/http"
-
+	"../../protocols"
 	"github.com/gorilla/websocket"
+	"net/http"
 )
 
 var upgrader = websocket.Upgrader{
@@ -24,10 +24,9 @@ func serveWebsocket(hub *Hub, w http.ResponseWriter, r *http.Request) {
 	client := &Client{
 		hub:  hub,
 		conn: conn,
-		send: make(chan Message),
+		send: make(chan protocols.Message),
 	}
 	client.hub.register <- client
-
 	go client.WriteOnConnection()
 	client.ReadOnConnection()
 }
