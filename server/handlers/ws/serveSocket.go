@@ -1,4 +1,4 @@
-package handlers
+package ws
 
 import (
 	"fmt"
@@ -32,6 +32,7 @@ func serveWebsocket(hub *Hub, w http.ResponseWriter, r *http.Request) {
 	client.ReadOnConnection()
 }
 
+//RunWebsocket func ...
 func RunWebsocket() {
 	hub := newHub()
 

@@ -1,5 +1,18 @@
-package handlers
+package ws
 
+import (
+	"github.com/gokh16/go_messenger/server/userConnections"
+)
+
+//Hub struct ...
+type Hub struct {
+	clients    map[*Client]bool
+	broadcast  chan Message
+	register   chan *Client
+	unregister chan *Client
+}
+
+//NewHub func ...
 func newHub() *Hub {
 	return &Hub{
 		broadcast:  make(chan Message),
@@ -9,12 +22,13 @@ func newHub() *Hub {
 	}
 }
 
+//RunHub func ..
 func (h *Hub) runHub() {
 	for {
 		select {
 		case client := <-h.register:
 			h.clients[client] = true
-
+			userConnections.WSConnections[client.conn] = ""
 		case client := <-h.unregister:
 			if _, ok := h.clients[client]; ok {
 				delete(h.clients, client)
@@ -29,8 +43,9 @@ func (h *Hub) runHub() {
 					delete(h.clients, client)
 				}
 			}
-			for conns, _ := range userConnections.TCPConnections {
-
+			for conns := range userConnections.TCPConnections {
+				conns.Write([]byte(message.Content))
+				conns.Write([]byte("\n"))
 			}
 		}
 	}

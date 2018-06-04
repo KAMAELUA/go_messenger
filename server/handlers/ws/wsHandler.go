@@ -1,4 +1,4 @@
-package handlers
+package ws
 
 import (
 	"encoding/json"
@@ -8,6 +8,28 @@ import (
 	"github.com/gorilla/websocket"
 )
 
+//Message struct ...
+type Message struct {
+	UserName    string `json:"username"`
+	GroupName   string `json:"group_name"`
+	ContentType string `json:"content_type"`
+	Content     string `json:"message_content"`
+	Login       string `json:"login"`
+	Password    string `json:"-"`
+	Email       string `json:"email"`
+	Status      bool   `json:"-"`
+	UserIcon    string `json:"-"`
+	Action      string `json:"action"`
+}
+
+//Client struct ...
+type Client struct {
+	hub  *Hub
+	conn *websocket.Conn
+	send chan Message
+}
+
+//ReadOnConnection func ...
 func (c *Client) ReadOnConnection() {
 
 	var msg Message
@@ -34,6 +56,7 @@ func (c *Client) ReadOnConnection() {
 	}
 }
 
+//WriteOnConnection func ...
 func (c *Client) WriteOnConnection() {
 	defer func() {
 		c.conn.Close()

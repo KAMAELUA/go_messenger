@@ -1,4 +1,4 @@
-package handlers
+package tcp
 
 import (
 	"bufio"
@@ -8,8 +8,23 @@ import (
 	"net"
 )
 
+//Message struct ...
+type Message struct {
+	UserName    string
+	GroupName   string
+	ContentType string
+	Content     string
+	Login       string
+	Password    string
+	Email       string
+	Status      bool
+	UserIcon    string
+	Action      string
+}
+
 var connections []net.Conn
 
+//Handler func ...
 func Handler() {
 	ln, err := net.Listen("tcp", ":8080")
 	if err != nil {
@@ -28,6 +43,7 @@ func Handler() {
 	}
 }
 
+//HandleJSON func ...
 func HandleJSON(conn net.Conn) {
 	remoteAddr := conn.RemoteAddr().String()
 	fmt.Println("Client connected from " + remoteAddr)
@@ -42,6 +58,7 @@ func HandleJSON(conn net.Conn) {
 	}
 }
 
+//ParseJSON func ..
 func ParseJSON(bytes []byte, conn net.Conn) (Message, string, string) {
 	flag := "tcp"
 	message := Message{}
