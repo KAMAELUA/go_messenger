@@ -1,4 +1,4 @@
-package handlers
+package ws
 
 import (
 	"encoding/json"
@@ -6,7 +6,6 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/gokh16/go_messenger/server/models"
 	"github.com/gorilla/websocket"
 )
 
@@ -18,15 +17,35 @@ var upgrader = websocket.Upgrader{
 	},
 }
 
+type Message struct {
+	UserName    string `json:"username"`
+	GroupName   string `json:"group_name"`
+	ContentType string `json:"content_type"`
+	Content     string `json:"content"`
+	Login       string `json:"login"`
+	Password    string `json:"-"`
+	Email       string `json:"email"`
+	Status      bool   `json:"-"`
+	UserIcon    string `json:"-"`
+	Action      string `json:"action"`
+}
+
 type Client struct {
 	hub  *Hub
 	conn *websocket.Conn
-	send chan models.Message
+	send chan Message
+}
+
+type Hub struct {
+	clients    map[*Client]bool
+	broadcast  chan Message
+	register   chan *Client
+	unregister chan *Client
 }
 
 func (c *Client) ReadOnConnection() {
 
-	var msg models.Message
+	var msg Message
 
 	defer func() {
 		c.hub.unregister <- c
@@ -43,7 +62,8 @@ func (c *Client) ReadOnConnection() {
 		}
 		err = json.Unmarshal(message, &msg)
 		if err != nil {
-			fmt.Println("There was an error:", err)
+			fmt.Println(err)
+			break
 		}
 		c.hub.broadcast <- msg
 	}
@@ -65,20 +85,4 @@ func (c *Client) WriteOnConnection() {
 			fmt.Println("Cannot write json")
 		}
 	}
-}
-
-func ServeWebsocket(hub *Hub, w http.ResponseWriter, r *http.Request) {
-	conn, err := upgrader.Upgrade(w, r, nil)
-	if err != nil {
-		fmt.Println("Cannot upgrade")
-	}
-	client := &Client{
-		hub:  hub,
-		conn: conn,
-		send: make(chan models.Message),
-	}
-	client.hub.register <- client
-
-	go client.WriteOnConnection()
-	go client.ReadOnConnection()
 }
