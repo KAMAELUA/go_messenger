@@ -1,7 +1,7 @@
 package ws
 
 import (
-	"github.com/gokh16/go_messenger/server/userConnections"
+	"../../userConnections"
 )
 
 //Hub struct ...
