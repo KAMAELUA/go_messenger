@@ -1,4 +1,4 @@
-package tcp
+package handlers
 
 import (
 	"bufio"
@@ -7,19 +7,6 @@ import (
 	"log"
 	"net"
 )
-
-type Message struct {
-	UserName    string
-	GroupName   string
-	ContentType string
-	Content     string
-	Login       string
-	Password    string
-	Email       string
-	Status      bool
-	UserIcon    string
-	Action      string
-}
 
 var connections []net.Conn
 
